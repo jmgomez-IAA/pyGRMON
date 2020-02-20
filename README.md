@@ -44,9 +44,9 @@ Expected Result: 0x01 0x03 0x 00 0x00
 
 
 ### Write command
-	Write Spw2 ctrl  (RTR.PCTRL) AMBA Addr: 0xFFF20808  RMAP Addr: 0x00000A08
+	Write Spw2 ctrl  (RTR.PCTRL) AMBA Addr: 0xFFF20808  RMAP Addr: 0x00000A08 Value: 0x081404F0
 	|Byte | Value | Description		|
-	| 0 | C0	| Write Command. Read Lenth = 1 Word.|
+	| 0 | C0	| Write Command. Write Lenth = 1 Word.|
 	| 1 | FF	| AMBA ADDR = 0xFFF20A08 |
 	| 2 | F2	|  |
 	| 3 | 0A	|  |
@@ -55,4 +55,4 @@ Expected Result: 0x01 0x03 0x 00 0x00
 	| 6 | 14	| |
 	| 7 | 04	| |
 	| 8 | F0	| |
-	| Command | 0x80 0xFF 0xF2 0x0A 0x08
+	| Command | 0xC0 0xFF 0xF2 0x0A 0x08 0x08 0x14 0x04 0xF0
