@@ -1,0 +1,71 @@
+@startuml
+control pyGRMON
+boundary UART_MASTER
+boundary GR718B_RTR
+
+pyGRMON -> UART_MASTER : establish_link(ttyUSB1,8N1)
+note left
+The python configures the UART port
+115200, parity none, stop bits 1, 
+bytesize 8.
+end note
+UART_MASTER -> GR718B_RTR : SynchronizeBaudrate()
+note left
+The baudrate is autodiscovered, so 0x55 is transmited
+so the UART master IPCore could determine the baudrate.
+end note
+
+UART_MASTER -> GR718B_RTR : send_wr_cmd(en_sist_dev)
+note left
+We don't know what we should enable first.
+end note
+
+== Enable the SIST PORT  ==
+
+UART_MASTER -> GR718B_RTR : send_wr_cmd(en_sist_port)
+UART_MASTER -> GR718B_RTR : send_rd_cmd(ctrl_sist_port)
+UART_MASTER --> UART_MASTER : recv_answer(RTR.PCTRL19)
+GR718B_RTR --> UART_MASTER  : RTR.PCTRL19
+
+UART_MASTER -> GR718B_RTR : send_rd_cmd(status_sist_port)
+UART_MASTER --> UART_MASTER : recv_answer(RTR.PSTS19)
+GR718B_RTR --> UART_MASTER  : RTR.PSTS19
+
+UART_MASTER -> GR718B_RTR : send_wr_cmd(en_sist_dev)
+UART_MASTER -> GR718B_RTR : send_rd_cmd(en_sist_dev)
+UART_MASTER --> UART_MASTER : recv_answer(SIST.PROT)
+GR718B_RTR --> UART_MASTER  : SIST.PROT
+
+== Build the Packet  ==
+
+UART_MASTER -> GR718B_RTR : send_wr_cmd(addr_sist_packet)
+UART_MASTER -> GR718B_RTR : send_wr_cmd(pid_sist_packet)
+UART_MASTER -> GR718B_RTR : send_wr_cmd(seed_sist_packet)
+UART_MASTER -> GR718B_RTR : send_wr_cmd(len_sist_packet)
+
+UART_MASTER -> GR718B_RTR : send_wr_cmd(rst_sist_timer0)
+UART_MASTER -> GR718B_RTR : send_wr_cmd(rst_sist_timer1)
+
+== Begin Verify the Packet structure ==
+
+UART_MASTER -> GR718B_RTR : send_rd_cmd(addr_sist_packet)
+UART_MASTER --> UART_MASTER : recv_answer(SIST.ADDR0)
+GR718B_RTR --> UART_MASTER  : SIST.ADDR0
+UART_MASTER -> GR718B_RTR : send_rd_cmd(pid_sist_packet)
+UART_MASTER --> UART_MASTER : recv_answer(SIST.PID)
+GR718B_RTR --> UART_MASTER  : SIST.PID
+UART_MASTER -> GR718B_RTR : send_rd_cmd(seed_sist_packet)
+UART_MASTER --> UART_MASTER : recv_answer(SIST.SEED)
+GR718B_RTR --> UART_MASTER  : SIST.SEED
+UART_MASTER -> GR718B_RTR : send_rd_cmd(len_sist_packet)
+UART_MASTER --> UART_MASTER : recv_answer(SIST.LEN)
+GR718B_RTR --> UART_MASTER  : SIST.LEN
+
+== Enable transmitter ==
+UART_MASTER -> GR718B_RTR : send_wr_cmd(ctrl_sist_packet)
+
+== Check Transmission ==
+UART_MASTER -> GR718B_RTR : send_rd_cmd(tx_bytecntr_sist)
+UART_MASTER --> UART_MASTER : recv_answer(SIST.txbytecntr)
+GR718B_RTR --> UART_MASTER  : SIST.txbytecntr
+@enduml
