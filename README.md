@@ -30,7 +30,8 @@ The interface supports a simple protocol where commands consist of a control byt
 	| 2 	| F2	|  					|  
 	| 3 	| 0A	|  					|  
 	| 4 	| 08	|  					|  
-	| Command | 0x80 0xFF 0xF2 0x0A 0x08			|
+	
+	Command | 0x80 0xFF 0xF2 0x0A 0x08 			
 
 
 Expected Result: 0x01 0x03 0x 00 0x00
