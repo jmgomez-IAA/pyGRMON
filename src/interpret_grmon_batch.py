@@ -1,5 +1,6 @@
 import sys
 import os
+import argparse
 import serial
 from binascii import unhexlify
 import struct
@@ -65,28 +66,43 @@ def parse_cmd(cnt, cmd_file):
 		# Debug
 		#print (addr_data)		
 
+parser = argparse.ArgumentParser(description='Executes the commands of a TCL script wi')
+parser.add_argument('-i', '--interface', required=True, help='Interface to communicate with.')
+parser.add_argument('-s','--script', required=True, help='GRMON script to execute')
+
+args = vars(parser.parse_args())
+
+
+print("Interface: ", format(args["interface"]))
+print("Script: ", format(args["script"]))
+
+
+tty_port = args["interface"]
+tcl_script = args["script"]
 
 try:
-	ser = serial.Serial( port='/dev/ttyUSB1',
+	ser = serial.Serial( port=tty_port,
     baudrate=115200,
     parity=serial.PARITY_NONE,
     stopbits=serial.STOPBITS_ONE,
     bytesize=serial.EIGHTBITS
 )
-except SerialException as e:
-	print ("Invalid serial device")
+except serial.SerialException as e:
+	print ("Port {} unavailable serial device", tty_port)
 	sys.exit()
 
-if (ser.isOpen()): 
-	sync_data = b'\x55\x55'
-	ser.write(sync_data)
-	print ("Port is opened.")
 
-time.sleep(.2)
+ser.isOpen()
+sync_data = b'\x55\x55'
+print (sync_data)	
+ser.write(sync_data)
+print ("Port is opened.")
 
-with open('my_run_sist_spw1.tcl') as cmd_file:
+time.sleep(0.100)
+
+with open(tcl_script) as cmd_file:
 	for cnt, line in enumerate(cmd_file):		
 		parse_cmd(cnt, line)
-		time.sleep(0.5)
+		time.sleep(0.010)
 
 ser.close()
